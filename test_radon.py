@@ -7,7 +7,10 @@ image = shepp_logan_phantom()
 image = rescale(image, scale=0.4, mode='reflect', channel_axis=None)
 
 theta = np.linspace(0.0, 180.0, max(image.shape), endpoint=False)
-sinogram = radon(image, theta=theta)
+sino = radon(image, theta=theta)
 
-reconstruction_fbp = iradon(sinogram, theta=theta, filter_name=None)
+plt.imshow(sino)
+plt.show()
+
+reconstruction_fbp = iradon(sino, theta=theta, filter_name=None)
 
