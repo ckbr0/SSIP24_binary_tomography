@@ -49,16 +49,16 @@ def front_project(img, angles, detector_size):
     """
     system_matrix = np.zeros(shape=(N_angles*N_d_total, N_px))
     print(system_matrix.shape)
-    #sinogram = np.zeros(shape=(N_angles, N_d_total))
+    #sinogram = np.zeros(shape=(N_angles, N_d_total)
     for i, angle in enumerate(angles):
-        print(i)
-        print((i*(N_angles-1)))
+        #print(i)
+        #print((i*(N_angles-1)))
         detector_grid_r = [shapely.affinity.rotate(dg, angle, origin=(0,0)) for dg in detector_grid]
         for j, dgr in enumerate(detector_grid_r):
             for k, ig in enumerate(img_grid):
                 intersection_area = shapely.intersection(dgr, ig).area
                 #print(i*N_angles)
-                system_matrix[(i*N_angles)+j, k] = intersection_area
+                system_matrix[(i*N_d_total)+j, k] = intersection_area
 
         """
         for img_g in img_grid:
@@ -75,8 +75,9 @@ def front_project(img, angles, detector_size):
     plt.show()
 
 if __name__ == "__main__":
-    angles = np.arange(0, 20)
+    angles = np.arange(0, 60)
     print(angles)
+    img = np.zeros(shape=(5,5))
     front_project(np.ones(shape=(5,5)), angles, detector_size=1)
 
 
