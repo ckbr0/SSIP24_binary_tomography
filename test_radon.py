@@ -35,6 +35,8 @@ print(img.ravel().shape)
 print(nx*ny)
 sino=G.dot(img.ravel()).reshape(na,nb)
 
+print(G.shape)
+
 #theta = np.linspace(0.0, 180.0, max(img.shape), endpoint=False)
 #sino2 = radon(img, theta=theta)
 
@@ -51,8 +53,14 @@ def fsolve_function(x):
 #initialGuess = np.full(shape=(nx,ny), fill_value=0.5)
 #res = root(fsolve_function, initialGuess, method='lm')
 
+plt.imshow(img)
+plt.show()
+
 res = lsq_linear(G, sino.ravel())
-plt.imshow(res.x.reshape(nx,ny))
+r_img = res.x
+r_img[r_img < 0.09] = 0
+r_img[r_img > 0.09] = 1
+plt.imshow(r_img.reshape(nx,ny))
 plt.show()
 """
 reconstruction_fbp = iradon(sino.T, theta=theta)#, #filter_name=None)
