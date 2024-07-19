@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def diff_map(out_name, img, rec, na, ds):
+def diff_map(out_name, img, rec, na, ds, save=True):
     rme = relative_mean_error(img,rec)
 
     img_w = img.shape[0]
@@ -16,8 +16,11 @@ def diff_map(out_name, img, rec, na, ds):
     axs[0,2].imshow(rec - img, cmap='gray', interpolation='none')
     axs[0,2].set_title('difference map')
 
-    #plt.imshow(x_out, cmap='gray', interpolation='none')
-    plt.savefig(f"results/{out_name}.png", bbox_inches='tight')
+    if save:
+        #plt.imshow(x_out, cmap='gray', interpolation='none')
+        plt.savefig(f"results/{out_name}.png", bbox_inches='tight')
+    else:
+        plt.show()
     plt.clf()
 
 def relative_mean_error(img, rec):

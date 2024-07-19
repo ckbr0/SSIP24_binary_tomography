@@ -39,11 +39,11 @@ def ART(A, AT, b, x, mu=1e0, niter=1e2, bpos=True):
 
 if __name__ == "__main__":
 
-    na = 36
-    angles = np.linspace(0, 180, na, endpoint=False)
-    print(angles)
+    #na = 36
+    #angles = np.linspace(0, 180, na, endpoint=False)
+    #print(angles)
 
-    G = np.load("projMat/sysMat_na36_px64_ds1.3_dt72.npy")
+    #G = np.load("projMat/sysMat_na36_px64_ds1.3_dt72.npy")
 
     """
     img = np.array(Image.open('_text3.pgm').convert('L'))
@@ -88,6 +88,11 @@ if __name__ == "__main__":
     N_d_total = (2*N_d + 2)
     N_angles = 36
 
+    angles = np.linspace(0, 180, N_angles, endpoint=False)
+    print(angles)
+
+    G = np.load(f"projMat/sysMat_na{N_angles}_px{img_w}_ds{detector_size}_dt{N_d_total}.npy")
+
     angles_out, G_out = get_every_nth_angle(G, angles, 20, N_d_total)
     n_angles_out = len(angles_out)
 
@@ -110,4 +115,4 @@ if __name__ == "__main__":
     #plt.imshow(x_out, cmap='gray', interpolation='none')
     #plt.show()
 
-    diff_map(f"art_butterfly_na{n_angles_out}_ds1.3", img, x_out, n_angles_out, detector_size)
+    diff_map(f"art_butterfly_na{n_angles_out}_ds{detector_size}", img, x_out, n_angles_out, detector_size, save=False)
