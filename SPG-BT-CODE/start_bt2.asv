@@ -1,0 +1,32 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Binary Tomography reconstruction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% clear;
+addpath('data');
+   
+ load phantom1; ph_orig=phantom1; load M_ph1_p2;  M=M_ph1_p2; load phantom1; load c_ph1_p2;  c=c_ph1_p2; 
+ %load phantom1; ph_orig=phantom2; load M_ph1_p3;  M=M_ph2_p3; load phantom1; load c_ph1_p3;  c=c_ph1_p3;
+ %load phantom1; ph_orig=phantom2; load M_ph1_p5;  M=M_ph2_p5; load phantom1; load c_ph1_p5;  c=c_ph2_p5; 
+ %load phantom1; ph_orig=phantom2; load M_ph1_p6;  M=M_ph2_p6; load phantom1; load c_ph1_p6;  c=c_ph2_p6;
+
+ %load phantom2; ph_orig=phantom2; load M_ph2_p2;  M=M_ph2_p2; load phantom2; load c_ph2_p2;  c=c_ph2_p2; 
+ %load phantom2; ph_orig=phantom2; load M_ph2_p3;  M=M_ph2_p3; load phantom2; load c_ph2_p3;  c=c_ph2_p3;
+ %load phantom2; ph_orig=phantom2; load M_ph2_p5;  M=M_ph2_p5; load phantom2; load c_ph2_p5;  c=c_ph2_p5; 
+ %load phantom2; ph_orig=phantom2; load M_ph2_p6;  M=M_ph2_p6; load phantom2; load c_ph2_p6;  c=c_ph2_p6;
+ 
+ %load phantom3; ph_orig=phantom3; load M_ph3_p2;  M=M_ph3_p2; load phantom3; load c_ph3_p2;  c=c_ph3_p2; 
+ %load phantom3; ph_orig=phantom3; load M_ph3_p3;  M=M_ph3_p3; load phantom3; load c_ph3_p3;  c=c_ph3_p3;
+ %load phantom3; ph_orig=phantom3; load M_ph3_p5;  M=M_ph3_p5; load phantom3; load c_ph3_p5;  c=c_ph3_p5; 
+ %load phantom3; ph_orig=phantom3; load M_ph3_p6;  M=M_ph3_p6; load phantom3; load c_ph3_p6;  c=c_ph3_p6;
+ 
+for m=1:5:30,
+        
+       
+  [u_spg snr_scg ef_scg cpu_scg]=spg_bt2(M,c,m);  % SPG BT reconstruction algorithm 
+
+  disp([ num2str(m) '  & SCG   &  $\varphi 7$ & ' num2str(size(snr_scg,2)) ' & ' num2str(ef_scg(end),'%6.2f') ' & ' num2str(snr_scg(end),'%6.2f') ' & ' num2str(cpu_scg(end),'%6.2f') '\\']); 
+
+   
+end;  % for loop
+ 

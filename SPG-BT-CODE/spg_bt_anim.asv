@@ -1,0 +1,187 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Deterministic Binary Tomography based on
+% Spectral Projected Gradient Method / SPG
+% 
+% Tibor Lukic, 2010.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ 
+
+clear; % Clear all variables
+
+%%% INPUT DATA
+% Projection vector: b.
+% Projection matrix: M.
+% The Problem: Solve M*X=b, where X is a binary (image) vector.
+% Image size (n x n)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%% Load projection data %%%%%%%%%%%%%%%%%%
+
+ addpath('data'); 
+ load M_ph2_p3;  M=M_ph2_p3; load phantom2; ph_orig=phantom2;
+ load c_ph2_p3;  c=c_ph2_p3;
+
+% M x= c
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+frame_count=1; Frames=[];
+
+
+[n_M N]=size(M); n=sqrt(N);
+
+
+%%%%%%%% Parameters of SPGBT Algorithm
+ 
+ w_hom=3;                  % Homogenity weight
+ mu=0.0001;                % Intil value of binary enforce term
+ mu_delta=0.2;
+ Eout=10^(-3);
+ Ein=10^(-1);
+ %Ein=10^(-7);
+ max_it=5000;
+ 
+ display_progress=1; %1;   % progress visualisation 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%% Parameters of SPG (inner) Algorithm
+gamma=10^(-4);
+sigma_1=0.1;
+sigma_2=0.9;
+m=1;          % line search parameter
+alpha_min=10^(-3);
+alpha_max=10^(3);
+alpha(1)=1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%% Initial configuration
+InitIm=0.5*ones(n,n); % Initial image
+Xnew=InitIm(:);          % Vector representation of initial image
+E=ones(n*n,1);
+
+total_iterations=0;
+if display_progress, figure; end;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% start_time=clock;        % Elapsed time measuring
+start_time=cputime;
+
+while max(min(Xnew,1-Xnew))>Eout, % As long as there are any non-binary pixels left
+%%% Outher loop
+    % mu=mu+mu_delta; % Increase binary factor
+    clear fun_bt_values;
+    fun_bt_values(1)=energy_bt(Xnew,n,n,M,c,w_hom,mu);
+        
+    k=1; 
+    
+    %%%%%%%% gradient calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    g=gradient_grad_vector(Xnew,n,n);   
+    gg=M'*(M*Xnew-c) + w_hom*g - mu*(Xnew-0.5*E);  
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+        
+    while  (k<2) || ( norm( proj(Xnew-gg)-Xnew,inf) > Ein &&  k < max_it ), 
+    %%% Inner loop
+    %%% argmin { obj. func. (x) }, x \in [0,1]^N
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    prj=proj(Xnew-alpha(k)*gg);
+    dk=proj(Xnew-alpha(k)*gg)-Xnew; % New direction/Scaled Projected Gradient
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %%%%%%%%%%%%%%%%%%%%%%% LINE SEARCH, calculate lambda_k %%%%%%%%%%%%    
+    
+    fun_max=max( fun_bt_values( 1+k-min(k,m) : k ));
+    
+    x_plus=Xnew+dk; 
+    
+    delta=dk'*gg;
+    lambda=1;
+    
+    while energy_bt(x_plus,n,n,M,c,w_hom,mu)> fun_max+gamma*lambda*delta,
+        lambda_temp=-0.5*lambda^2*delta/(energy_bt(x_plus,n,n,M,c,w_hom,mu)-fun_bt_values(k)-lambda*delta );
+        if and( (lambda_temp >= sigma_1) , (lambda_temp<= sigma_2*lambda) ),
+            lambda=lambda_temp;
+        else
+            lambda=0.5*lambda;
+        end;
+        x_plus=Xnew+lambda*dk;
+    end;
+    
+    
+    %%%%%%%%%%%%%%%%%% END LINE SEARCH  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   
+    Xold=Xnew;
+    Xnew=x_plus; % New iteration
+    
+    fun_bt_values(k+1)=energy_bt(Xnew,n,n,M,c,w_hom,mu);
+    s_k=Xnew-Xold;
+    
+    
+    %%%%%%%% gradient calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    g=gradient_grad_vector(Xnew,n,n);   
+    gg_new=M'*(M*Xnew-c) + w_hom*g - mu*(Xnew-0.5*E);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+       
+    y_k=gg_new - gg; gg=gg_new;
+    beta_k=s_k'*y_k;
+    
+    if (beta_k <= 0),
+        alpha(k+1)=alpha_max;
+    else
+        alpha(k+1)=min(alpha_max,max(alpha_min,(s_k'*s_k)/beta_k));
+    end;
+    k=k+1;
+    
+    if display_progress,   
+     imshow(rowreshape(Xnew,n,n)',[],'InitialMagnification','fit'); fix_export;
+     % title(['mu: ' num2str(mu) '  k: ' num2str(k) '  lambda:'  num2str(lambda)   ]);
+     drawnow; % colormap('gray');
+     if mod(total_iterations+k,3)==0, 
+              Frames(k)=getframe;
+    end;
+    
+    end;
+%%%%%%%%%%%%%%%%% argmin { fun(x) }, x \in [0,1]^N %%%%%%%%
+%%%%%%%%%%%%%%%%% END SPG Algorithm %%%%%%%%%%%%%%%%%%%%%%%
+    
+% disp(sprintf('mu:  %f, Inner iterations: %d' , mu, k)) ;
+
+%%%%%%%%%%%%%% Increasing binary factor
+%  mu=mu+mu_delta; 
+%  mu=2*mu+mu_delta;
+   mu=1.2*mu;
+      
+   total_iterations=total_iterations+k-1;
+
+end;
+
+cpu_t=cputime-start_time;
+
+%%%%%%%%%%%%%%%%%% Output %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+out_im=rowreshape(Xnew,n,n)';              % Shape it back to an image
+
+disp(sprintf('Line search parameter M:    %d', m ));
+
+disp(sprintf('Total number of iterations: %d', total_iterations ));
+
+disp(sprintf('CPU time:                   %f seconds' , cpu_t));
+
+disp(sprintf('Projection error:           %f', norm(M*Xnew-c)  )   );
+
+disp(sprintf('Reconstruction error:       %d', sum(sum(abs(ph_orig-out_im)  ))  ) );
+
+%figure;
+%imshow(out_im,[],'InitialMagnification','fit');
+%title('Output');
+
+
+
+    

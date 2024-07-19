@@ -23,12 +23,13 @@ def front_project(img, angles, detector_size):
     
     N_px = img_w * img_w
     N_angles = len(angles)
+    print(N_angles)
     #print(angles.shape)
     #print(N_angles)
 
     N_d = int(np.ceil(np.sqrt(2)*img_w/(2*detector_size)))
     N_d_total = (2*N_d + 2)
-    print(N_d_total)
+    #print(N_d_total)
 
     detector_size_total = N_d_total * detector_size
 
@@ -88,7 +89,7 @@ def front_project(img, angles, detector_size):
     #print(system_matrix.shape)
     #sinogram = np.zeros(shape=(N_angles, N_d_total))
     for i, angle in enumerate(angles):
-        print(i+1, '/', N_angles, angle)
+        #print(i+1, '/', N_angles, angle)
         #print((i*(N_angles-1)))
         detector_grid_r = [shapely.affinity.rotate(dg, angle, origin=(0,0)) for dg in detector_grid]
 
@@ -349,25 +350,38 @@ if __name__ == "__main__":
     print(img.shape)
     """
 
-    na = 36
+    #na = 36
     #na = 4
-    angles = np.linspace(0, 180, na, endpoint=False)
+    #angles = np.linspace(0, 180, na, endpoint=False)
     #img_size_list = [97, 127, 257, 513]
     #img_size_list = [193]
-    img_size_list = [64]
+    #img_size_list = [32, 64]
+    img_size_list = [64]#, 64]
     #ds_list = [1, 1.5, 2, 5]
-    ds_list = [0.8, 1, 1.3]
+    ds_list = [0.8, 1, 1.3, 2]
+    ds_list = [6]
+
+    #na_list = [36, 18, 9, 4, 3, 2, 1]
+    #na_list = [18, 9, 4, 3, 2, 1]
+    na_list = [36]
 
     for img_size in img_size_list:
-
         print("current img size:", img_size)
-        for ds in ds_list:
+
+        for na in na_list:
+            print("current number of angle:", na)
+
+            angles = np.linspace(0, 180, na, endpoint=False)
             
-            print("current det size:", ds)
-            img = np.zeros(shape=(img_size,img_size))
-            G, sino, N_d_total = front_project(img, angles, detector_size=ds)
-            np.save(f"projMat/sysMat_na{na}_px{img_size}_ds{ds}_dt{N_d_total}.npy", G)
-            savemat(f"projMat/sysMat_na{na}_px{img_size}_ds{ds}_dt{N_d_total}.mat", {"G" : G})
+            for ds in ds_list:
+                
+                print(len(angles))
+                print("current det size:", ds)
+                img = np.zeros(shape=(img_size,img_size))
+                G, sino, N_d_total = front_project(img, angles, detector_size=ds)
+                print(G.shape)
+                np.save(f"projMat/sysMat_na{na}_px{img_size}_ds{ds}_dt{N_d_total}.npy", G)
+                savemat(f"projMat/sysMat_na{na}_px{img_size}_ds{ds}_dt{N_d_total}.mat", {"G" : G})
 
     """
     img_size = 4

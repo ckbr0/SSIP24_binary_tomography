@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+# projMat
+projMat/
+sinograms/
+results/
+proj/
+SPG-BT-CODE.zip
+
 # Distribution / packaging
 .Python
 build/

@@ -3,3 +3,6 @@ https://arxiv.org/pdf/1309.0985
 https://uni-obuda.hu/conferences/cinti2009/24_cinti2009_submission.pdf
 https://www.sciencedirect.com/science/article/pii/S0166218X12004362?ref=pdf_download&fr=RR-2&rr=8a21552d2e56c1b2
 https://github.com/OhGreat/DART_python?tab=readme-ov-file#original_publication
+
+
+ART, SART, DART: https://engineering.purdue.edu/~malcolm/pct/CTI_Ch07.pdf
